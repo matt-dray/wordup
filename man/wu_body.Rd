@@ -19,8 +19,8 @@ Extract Specific Body Elements
 }
 \examples{
 path <- system.file("examples/simple.docx", package = "wordup")
-body_list <- wu_read(path)
-p_list <- wu_body(body_list, "p")
+doc_list <- wu_read(path)
+p_list <- wu_body(doc_list, "p")
 str(p_list, give.attr = FALSE, max.level = 1)
 
 }
