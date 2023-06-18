@@ -4,8 +4,9 @@
 #' Markdown version of it. Some post-editing may be necessary for more complex
 #' tables.
 #'
-#' @param pasted_table Character. A single string that contains the content of
-#'     a table copy and pasted from a Word document.
+#' @param word_table Character. Copy a table from Microsoft Word. If `NULL`
+#'     the table will be extracted from the clipboard. Otherwise, you can paste
+#'     it as a single string.
 #' @param guess_types Logical. Should data types be guessed for each column
 #'     based on their content? Defaults to `TRUE`. If `FALSE`, all columns will
 #'     be returned as character type.
@@ -23,16 +24,16 @@
 #'     the copy-pasted table.
 #'
 #' @examples
-#' pasted_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
+#' word_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
 #' X	100	1,000	1%	15
 #' Y	200	2,000	2%	12
 #' Z	300	3,000	3%	[c]")
 #'
-#' convert_table_to_md(pasted_table, to_clipboard = FALSE)
+#' convert_table_to_md(word_table, to_clipboard = FALSE)
 #'
 #' @export
 convert_table_to_md <- function(
-    pasted_table = clipr::read_clip_tbl(),  # TODO: read off the clipboard with clipr::read_clip?
+    word_table = NULL,
     guess_types = TRUE,
     ignore_regex = ",|%|\\[c\\]",
     has_row_titles = FALSE,
@@ -70,9 +71,16 @@ convert_table_to_md <- function(
 
   }
 
-  # TODO: how check pasted_table input? basic check for \t and \n?
+  # TODO: how check word_table input? basic check for \t and \n?
 
-  rows <- strsplit(pasted_table, "\n")[[1]]
+  if (is.null(word_table)) {
+    rows <- clipr::read_clip()
+  }
+
+  if (!is.null(word_table)) {
+    rows <- strsplit(word_table, "\n")[[1]]
+  }
+
   cells <- lapply(rows, \(x) trimws(strsplit(x, "\t")[[1]]))
   dat <- do.call("rbind", cells[-1]) |> as.data.frame()
   names(dat) <- cells[[1]]
@@ -101,8 +109,16 @@ convert_table_to_md <- function(
 
   }
 
-  # TODO: logic for has_row_titles
-  # TODO: logic for totals_rows
+
+  if (has_row_titles) {
+    # TODO: logic for has_row_titles
+    dat <- dat
+  }
+
+  if (!is.null(totals_rows)) {
+    # TODO: logic for totals_rows
+    dat <- dat
+  }
 
   # Rearrange into vector for printing and copying
   vec <- character(length = nrow(dat) + 1)

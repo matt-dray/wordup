@@ -5,7 +5,7 @@
 \title{Convert a Copy-Pasted Word Table to Govspeak}
 \usage{
 convert_table_to_md(
-  pasted_table = clipr::read_clip_tbl(),
+  word_table = NULL,
   guess_types = TRUE,
   ignore_regex = ",|\%|\\\\[c\\\\]",
   has_row_titles = FALSE,
@@ -14,8 +14,9 @@ convert_table_to_md(
 )
 }
 \arguments{
-\item{pasted_table}{Character. A single string that contains the content of
-a table copy and pasted from a Word document.}
+\item{word_table}{Character. Copy a table from Microsoft Word. If \code{NULL}
+the table will be extracted from the clipboard. Otherwise, you can paste
+it as a single string.}
 
 \item{guess_types}{Logical. Should data types be guessed for each column
 based on their content? Defaults to \code{TRUE}. If \code{FALSE}, all columns will
@@ -44,11 +45,11 @@ Markdown version of it. Some post-editing may be necessary for more complex
 tables.
 }
 \examples{
-pasted_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
+word_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
 X	100	1,000	1\%	15
 Y	200	2,000	2\%	12
 Z	300	3,000	3\%	[c]")
 
-convert_table_to_md(pasted_table, to_clipboard = FALSE)
+convert_table_to_md(word_table, to_clipboard = FALSE)
 
 }
