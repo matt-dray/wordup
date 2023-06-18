@@ -1,6 +1,6 @@
 #' Convert a Copy-Pasted Word Table to Govspeak
 #'
-#' Copy and paste a table from a Word document and be returned a Govspeak
+#' Provide a copied table from a Word document and be returned a Govspeak
 #' Markdown version of it. Some post-editing may be necessary for more complex
 #' tables.
 #'
@@ -9,6 +9,8 @@
 #' @param guess_types Logical. Should data types be guessed for each column
 #'     based on their content? Defaults to `TRUE`. If `FALSE`, all columns will
 #'     be returned as character type.
+#' @param ignore_regex Character. A regular expression of strings to ignore
+#'     when trying to guess column types.
 #' @param has_row_titles Logical. Should the first column be treated as though
 #'     it contains titles for each row? Defaults to `FALSE`. If `TRUE`, the
 #'     first column will be marked-up as bold.
@@ -30,8 +32,9 @@
 #'
 #' @export
 convert_table_to_md <- function(
-    pasted_table,  # TODO: read off the clipboard with clipr::read_clip?
+    pasted_table = clipr::read_clip_tbl(),  # TODO: read off the clipboard with clipr::read_clip?
     guess_types = TRUE,
+    ignore_regex = ",|%|\\[c\\]",
     has_row_titles = FALSE,
     totals_rows = NULL,
     to_clipboard = TRUE
@@ -75,17 +78,12 @@ convert_table_to_md <- function(
   names(dat) <- cells[[1]]
 
   if (!guess_types) {
-
-    dat <- rbind(
-      rep("-------", length(dat)),
-      dat
-    )
-
+    dat <- rbind(rep("-------", length(dat)), dat)
   }
 
   if (guess_types) {
 
-    are_cols_num <- lapply(dat, \(x) gsub(",|%|\\[c\\]", "", x)) |>
+    are_cols_num <- lapply(dat, \(x) gsub(ignore_regex, "", x)) |>
       utils::type.convert(as.is = TRUE) |>
       lapply(is.numeric)
 
@@ -105,13 +103,24 @@ convert_table_to_md <- function(
 
   # TODO: logic for has_row_titles
   # TODO: logic for totals_rows
-  # TODO: convert the dataframe to a markdown string.
 
+  # Rearrange into vector for printing and copying
+  vec <- character(length = nrow(dat) + 1)
+  for (row in 1:nrow(dat)) {
+    row_pasted <- paste0("|", paste0(dat[row, ], collapse = "|"), "|\n")
+    vec[row + 1] <- row_pasted
+  }
+  vec[1] <- paste0("|", paste0(names(dat), collapse = "|"), "|\n")
+
+  # Print to console
+  cat(vec, sep = "")
+
+  # Optionally copy to clipboard
   if (to_clipboard) {
-    clipr::write_clip(dat)
-    message("Wrote to clipboard.")
+    clipr::write_clip(vec, return_new = TRUE, breaks = "")
+    message("The output table has been written to the clipboard.")
   }
 
-  return(dat)
+  return(invisible(vec))
 
 }

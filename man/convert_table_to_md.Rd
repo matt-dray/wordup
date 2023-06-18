@@ -5,8 +5,9 @@
 \title{Convert a Copy-Pasted Word Table to Govspeak}
 \usage{
 convert_table_to_md(
-  pasted_table,
+  pasted_table = clipr::read_clip_tbl(),
   guess_types = TRUE,
+  ignore_regex = ",|\%|\\\\[c\\\\]",
   has_row_titles = FALSE,
   totals_rows = NULL,
   to_clipboard = TRUE
@@ -19,6 +20,9 @@ a table copy and pasted from a Word document.}
 \item{guess_types}{Logical. Should data types be guessed for each column
 based on their content? Defaults to \code{TRUE}. If \code{FALSE}, all columns will
 be returned as character type.}
+
+\item{ignore_regex}{Character. A regular expression of strings to ignore
+when trying to guess column types.}
 
 \item{has_row_titles}{Logical. Should the first column be treated as though
 it contains titles for each row? Defaults to \code{FALSE}. If \code{TRUE}, the
@@ -35,7 +39,7 @@ Character. A string that contains Govspeak Markdown that represents
 the copy-pasted table.
 }
 \description{
-Copy and paste a table from a Word document and be returned a Govspeak
+Provide a copied table from a Word document and be returned a Govspeak
 Markdown version of it. Some post-editing may be necessary for more complex
 tables.
 }
