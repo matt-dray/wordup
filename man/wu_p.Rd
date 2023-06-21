@@ -4,10 +4,10 @@
 \alias{wu_p}
 \title{Extract All 'p' Body Text and Style to a Dataframe}
 \usage{
-wu_p(body_list)
+wu_p(p_list)
 }
 \arguments{
-\item{body_list}{List. Output from \link{wu_body}.}
+\item{p_list}{List. Output from \link{wu_body} with argument \code{element = "p"}.}
 }
 \value{
 A data.frame with a row per 'p' element and columns with text and
@@ -18,8 +18,8 @@ Extract All 'p' Body Text and Style to a Dataframe
 }
 \examples{
 path <- system.file("examples/simple.docx", package = "wordup")
-body_list <- wu_read(path)
-p_list <- wu_body(body_list, "p")
-head(wu_p(p_list))
+doc_list <- wu_read(path)
+p_list <- wu_body(doc_list, "p")
+wu_p(p_list)
 
 }
