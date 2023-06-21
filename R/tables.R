@@ -4,14 +4,14 @@
 #' Markdown version of it. Some post-editing may be necessary for more complex
 #' tables.
 #'
-#' @param word_table Character. Copy a table from Microsoft Word. If `NULL`
-#'     the table will be extracted from the clipboard. Otherwise, you can paste
-#'     it as a single string.
+#' @param word_table Character. A table copy-pasted from a Microsoft Word
+#'     document. If `NULL` (default) the table will be read from the clipboard
+#'     so that you don't have to paste it.
 #' @param guess_types Logical. Should data types be guessed for each column
 #'     based on their content? Defaults to `TRUE`. If `FALSE`, all columns will
 #'     be returned as character type.
 #' @param ignore_regex Character. A regular expression of strings to ignore
-#'     when trying to guess column types.
+#'     when trying to guess column types. See details.
 #' @param has_row_titles Logical. Should the first column be treated as though
 #'     it contains titles for each row? Defaults to `FALSE`. If `TRUE`, the
 #'     first column will be marked-up as bold.
@@ -20,14 +20,24 @@
 #' @param to_clipboard Logical. Should the output be copied to your clipboard?
 #'     Defaults to `TRUE`.
 #'
+#' @details
+#' If `guess_types` is `TRUE`, then [utils::type.convert()] is used to coerce
+#' each column to the appropriate data type. For example, a column containing
+#' numbers will be coerced to `numeric`. This will fail if the numbers in a
+#' given column are formatted to contain non-numeric characters, like '1,234'
+#' (comma) or '10%' (percentage symbol). Use `ignore_regex` so that the process
+#' of guessing the data types will ignore these characters.
+#'
 #' @return Character. A string that contains Govspeak Markdown that represents
 #'     the copy-pasted table.
 #'
 #' @examples
-#' word_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
-#' X	100	1,000	1%	15
-#' Y	200	2,000	2%	12
-#' Z	300	3,000	3%	[c]")
+#' word_table <- c(
+#'   "Column 1	Column 2	Column 3	Column 4	Column 5
+#'   X	100	1,000	1%	15
+#'   Y	200	2,000	2%	12
+#'   Z	300	3,000	3%	[c]"
+#' )
 #'
 #' convert_table_to_md(word_table, to_clipboard = FALSE)
 #'
@@ -35,7 +45,7 @@
 convert_table_to_md <- function(
     word_table = NULL,
     guess_types = TRUE,
-    ignore_regex = ",|%|\\[c\\]",
+    ignore_regex = ",|%|\\[.\\]",
     has_row_titles = FALSE,
     totals_rows = NULL,
     to_clipboard = TRUE
@@ -85,6 +95,16 @@ convert_table_to_md <- function(
   dat <- do.call("rbind", cells[-1]) |> as.data.frame()
   names(dat) <- cells[[1]]
 
+  if (!is.null(totals_rows)) {
+    for (row in totals_rows) {
+      dat[row, ] <- paste0("**", dat[row, ], "**")
+    }
+  }
+
+  if (has_row_titles) {
+    dat[[1]] <- paste("#", dat[[1]])
+  }
+
   if (!guess_types) {
     dat <- rbind(rep("-------", length(dat)), dat)
   }
@@ -109,24 +129,13 @@ convert_table_to_md <- function(
 
   }
 
-
-  if (has_row_titles) {
-    # TODO: logic for has_row_titles
-    dat <- dat
-  }
-
-  if (!is.null(totals_rows)) {
-    # TODO: logic for totals_rows
-    dat <- dat
-  }
-
   # Rearrange into vector for printing and copying
   vec <- character(length = nrow(dat) + 1)
   for (row in 1:nrow(dat)) {
-    row_pasted <- paste0("|", paste0(dat[row, ], collapse = "|"), "|\n")
+    row_pasted <- paste0("| ", paste0(dat[row, ], collapse = " | "), " |\n")
     vec[row + 1] <- row_pasted
   }
-  vec[1] <- paste0("|", paste0(names(dat), collapse = "|"), "|\n")
+  vec[1] <- paste0("| ", paste0(names(dat), collapse = " | "), " |\n")
 
   # Print to console
   cat(vec, sep = "")

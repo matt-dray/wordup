@@ -7,23 +7,23 @@
 convert_table_to_md(
   word_table = NULL,
   guess_types = TRUE,
-  ignore_regex = ",|\%|\\\\[c\\\\]",
+  ignore_regex = ",|\%|\\\\[.\\\\]",
   has_row_titles = FALSE,
   totals_rows = NULL,
   to_clipboard = TRUE
 )
 }
 \arguments{
-\item{word_table}{Character. Copy a table from Microsoft Word. If \code{NULL}
-the table will be extracted from the clipboard. Otherwise, you can paste
-it as a single string.}
+\item{word_table}{Character. A table copy-pasted from a Microsoft Word
+document. If \code{NULL} (default) the table will be read from the clipboard
+so that you don't have to paste it.}
 
 \item{guess_types}{Logical. Should data types be guessed for each column
 based on their content? Defaults to \code{TRUE}. If \code{FALSE}, all columns will
 be returned as character type.}
 
 \item{ignore_regex}{Character. A regular expression of strings to ignore
-when trying to guess column types.}
+when trying to guess column types. See details.}
 
 \item{has_row_titles}{Logical. Should the first column be treated as though
 it contains titles for each row? Defaults to \code{FALSE}. If \code{TRUE}, the
@@ -44,11 +44,21 @@ Provide a copied table from a Word document and be returned a Govspeak
 Markdown version of it. Some post-editing may be necessary for more complex
 tables.
 }
+\details{
+If \code{guess_types} is \code{TRUE}, then \code{\link[utils:type.convert]{utils::type.convert()}} is used to coerce
+each column to the appropriate data type. For example, a column containing
+numbers will be coerced to \code{numeric}. This will fail if the numbers in a
+given column are formatted to contain non-numeric characters, like '1,234'
+(comma) or '10\%' (percentage symbol). Use \code{ignore_regex} so that the process
+of guessing the data types will ignore these characters.
+}
 \examples{
-word_table <- c("Column 1	Column 2	Column 3	Column 4	Column 5
-X	100	1,000	1\%	15
-Y	200	2,000	2\%	12
-Z	300	3,000	3\%	[c]")
+word_table <- c(
+  "Column 1	Column 2	Column 3	Column 4	Column 5
+  X	100	1,000	1\%	15
+  Y	200	2,000	2\%	12
+  Z	300	3,000	3\%	[c]"
+)
 
 convert_table_to_md(word_table, to_clipboard = FALSE)
 
