@@ -39,10 +39,10 @@
 #'   Z	300	3,000	3%	[c]"
 #' )
 #'
-#' convert_table_to_md(word_table, to_clipboard = FALSE)
+#' table_to_govspeak(word_table, to_clipboard = FALSE)
 #'
 #' @export
-convert_table_to_md <- function(
+table_to_govspeak <- function(
     word_table = NULL,
     guess_types = TRUE,
     ignore_regex = ",|%|\\[.\\]",
@@ -95,16 +95,6 @@ convert_table_to_md <- function(
   dat <- do.call("rbind", cells[-1]) |> as.data.frame()
   names(dat) <- cells[[1]]
 
-  if (!is.null(totals_rows)) {
-    for (row in totals_rows) {
-      dat[row, ] <- paste0("**", dat[row, ], "**")
-    }
-  }
-
-  if (has_row_titles) {
-    dat[[1]] <- paste("#", dat[[1]])
-  }
-
   if (!guess_types) {
     dat <- rbind(rep("-------", length(dat)), dat)
   }
@@ -127,6 +117,16 @@ convert_table_to_md <- function(
 
     dat <- rbind(are_cols_num, dat)
 
+  }
+
+  if (!is.null(totals_rows)) {
+    for (row in totals_rows) {
+      dat[row + 1, ] <- paste0("**", dat[row + 1, ], "**")
+    }
+  }
+
+  if (has_row_titles) {
+    dat[2:nrow(dat), 1] <- paste("#", dat[2:nrow(dat), 1] )
   }
 
   # Rearrange into vector for printing and copying
