@@ -24,6 +24,8 @@ which is the format required to publish on
 This package is a personal project for learning purposes. It may never
 be finished and has no guarantees.
 
+You may also be interested in [a demo Shinylive app](https://matt-dray.github.io/govspeakify-tables/) for [converting tables to Govspeak format](https://www.rostrum.blog/posts/2023-10-08-govspeakify-tables/).
+
 ## Motivation and scope
 
 Producers of [statistical
